@@ -5,13 +5,21 @@ import { diaryRepository } from "../repositories/diary";
 import TodayDate from "../components/toDayDate";
 
 function Home() {
+  const[title,setTile]=useState('')
   const[content,setContent]=useState('')
+  const [date,setDate]=useState(()=>{
+    const today=new Date();
+    return today.toISOString().split("T")[0]
+  })
+
   const {currentUser}=useContext(SessionContext);
 
   const creatediary=async()=>{
-    const diary =await diaryRepository.create(content,currentUser.id)
+    const diary =await diaryRepository.create(content,currentUser.id,date,title)
     console.log(diary)
     setContent('')
+    setTile('')
+    setDate(new Date().toISOString().split('T')[0])
   }
 
   if (currentUser == null) return <Navigate replace to="/signin"/>
@@ -32,10 +40,22 @@ function Home() {
         <div className="grid grid-cols-3 gap-4">
           <div className="col-span-2">
             <div className="bg-white p-4 rounded-lg shadow-md">
-              <h1                className="w-full p-2 mb-4 ">学んだことのアウトプット</h1>
+              <h1 className="w-full p-0.5 mb-4 "><b>学んだことのアウトプット</b></h1>
+              <input 
+              type="date"
+              className="w-full p-2 mb-4 border-2 border-gray-200 rounded-md"
+              value={date}
+              onChange={(e)=>setDate(e.target.value)} />
+              <h1 className="w-full p-0.5 mb-4 ">タイトル</h1>
+              <input
+                className="w-full p-2 mb-4 border-2 border-gray-200 rounded-md"
+                placeholder="タイトル"
+                onChange={(e)=>setTile(e.target.value)}
+                value={title} />
+              <h1 className="w-full p-0.5 mb-4 ">学び</h1>
               <textarea
                 className="w-full p-2 mb-4 border-2 border-gray-200 rounded-md"
-                placeholder=""
+                placeholder="学んだことをここに書き記してください"
                 onChange={(e)=>setContent(e.target.value)}
                 value={content}
               />
