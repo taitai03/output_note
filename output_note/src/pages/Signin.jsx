@@ -12,7 +12,7 @@ function Signin() {
   const signin=async()=>{
     const user=await authRepository.signin(email,password);
     setCurrentUser(user)
-    navigate('/home');
+    //navigate('/home');
   }
 
   if (currentUser !=null)return <Navigate replace to='/' />
