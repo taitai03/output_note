@@ -8,5 +8,27 @@ export const diaryRepository={
     .select()
     if (error != null)throw new Error(error.message)
     return data[0]
+  },
+
+  async find(){
+    const {data,error}=await supabase
+    .from('diaries_view')
+    .select("*")
+    .order('created_at',{asceinding:false})
+    if (error != null)throw new Error(error.message)
+      return data.map((diary)=>{
+    return{
+      ...diary,
+      userId:diary.user_id,
+      userName:diary.user_metadata.name,
+
+    }
+    })
+  },
+
+  async delete(id){
+    const {error} = await supabase.from('diaries').delete().eq('id',id) 
+    if (error != null)throw new Error(error.message)
+      return true
   }
 }

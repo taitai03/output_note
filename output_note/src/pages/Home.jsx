@@ -1,12 +1,14 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { SessionContext } from "../SessionProvider";
-import { Navigate } from "react-router-dom";
+import { Navigate, useAsyncError } from "react-router-dom";
 import { diaryRepository } from "../repositories/diary";
 import TodayDate from "../components/toDayDate";
+import { Diary } from "../components/Diary";
 
 function Home() {
   const[title,setTile]=useState('')
   const[content,setContent]=useState('')
+  const [diaries,setDiaries]=useState([])
   const [date,setDate]=useState(()=>{
     const today=new Date();
     return today.toISOString().split("T")[0]
@@ -14,12 +16,28 @@ function Home() {
 
   const {currentUser}=useContext(SessionContext);
 
+  useEffect(()=>{
+    fetchdiary();
+
+  },[])
+
   const creatediary=async()=>{
-    const diary =await diaryRepository.create(content,currentUser.id,date,title)
+    const diary =await diaryRepository.create(content,currentUser.id,date,title);
+    setDiaries([{...diary,userId:currentUser.id,userName:currentUser.userName},...diaries])
     console.log(diary)
     setContent('')
     setTile('')
     setDate(new Date().toISOString().split('T')[0])
+  }
+
+  const fetchdiary=async ()=>{
+    const diaries=await diaryRepository.find();
+    setDiaries(diaries)
+  }
+
+  const deleteDiary=async (diaryId)=>{
+    await diaryRepository.delete(diaryId);
+    setDiaries(diaries.filter((diary)=>diary.id !==diaryId))
   }
 
   if (currentUser == null) return <Navigate replace to="/signin"/>
@@ -65,7 +83,11 @@ function Home() {
                 Post
               </button>
             </div>
-            <div className="mt-4"></div>
+            <div className="mt-4">
+              {diaries.map((diary)=>(
+                <Diary key={diary.id} diary={diary} onDelete={deleteDiary} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
